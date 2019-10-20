@@ -52,13 +52,20 @@ public class TestUserTestingDotCom
             xpaths.Add(xPath);
         }
     
-        // verify the name of each navigation item 
+        /* verify the name of each item in the navigation */
+
         IList<string> navigationMenuItems = new List<string>();
         
         foreach(string path in xpaths)
         {
-            string text = driver.FindElement(By.XPath(path)).Text;
-            navigationMenuItems.Add(text);
+            try
+            {
+                string text = driver.FindElement(By.XPath(path)).Text;
+                navigationMenuItems.Add(text);
+            }catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         Assert.True(navigationMenuItems.Count == 6);
@@ -69,32 +76,37 @@ public class TestUserTestingDotCom
         Assert.AreEqual(menu5, navigationMenuItems[4]);
         Assert.AreEqual(menu6, navigationMenuItems[5]);
 
-        // verify hovering each navigation item
-        Actions action = new Actions(driver);
+        /* Verify hovering action over each item in the navigation */
 
-        var platform = driver.FindElement(By.XPath(xpaths[0]));
-        action.MoveToElement(platform).Perform();
-
-    }
-
-    [Test, Order(3)]
-    public void hoverNavigation()
-    {
-        // First, find Platform menu in navigation
-        var platformMenu = driver.FindElement(By.XPath("/html/body/div[4]/div[1]/header/div/nav[1]/ul/li[1]/a"));
-        
-        // Hover action
-        Actions action = new Actions(driver);
-        action.MoveToElement(platformMenu).Perform();
-
-        // Verify the secondary navigation is shown 
         WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
-        var webElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("/html/body/div[4]/div[1]/header/div/nav[1]/ul/li[1]/nav/div/div[2]/ul")));
-        Assert.IsNotNull(webElement);
+        Actions action = new Actions(driver);
 
+        IWebElement platform = driver.FindElement(By.XPath(xpaths[0]));
+        IWebElement solutions = driver.FindElement(By.XPath(xpaths[1]));
+        IWebElement customers = driver.FindElement(By.XPath(xpaths[2]));
+        IWebElement partners = driver.FindElement(By.XPath(xpaths[3]));
+        IWebElement resources = driver.FindElement(By.XPath(xpaths[4]));
+        IWebElement getPaidToTest = driver.FindElement(By.XPath(xpaths[5]));
 
+        action.MoveToElement(platform).Perform();
+        var platformBox = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("div.platform-nav")));
+        Assert.IsNotNull(platformBox);
+
+        action.MoveToElement(solutions).Perform();
+        var solutionsBox = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("div.solutions-nav")));
+        Assert.IsNotNull(solutionsBox);
+        
+        // customers menu has no dropdown menu, so it should throw a timeout exception
+        action.MoveToElement(customers).Perform();    
+        try
+        {
+            var customersBox = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("div.customers-nav")));
+            Assert.Fail();
+        }catch(Exception e)
+        {
+            WebDriverTimeoutException expected = new WebDriverTimeoutException();
+            Assert.AreEqual(expected.GetType(), e.GetType());
+        }
     }
-
-
 
 }
