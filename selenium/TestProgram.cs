@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.Interactions;
-
+using TestHelpers;
 
 public class TestUserTestingDotCom
 {
@@ -80,7 +80,6 @@ public class TestUserTestingDotCom
 
         WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
         Actions action = new Actions(driver);
-
         IWebElement platform = driver.FindElement(By.XPath(xpaths[0]));
         IWebElement solutions = driver.FindElement(By.XPath(xpaths[1]));
         IWebElement customers = driver.FindElement(By.XPath(xpaths[2]));
@@ -89,24 +88,15 @@ public class TestUserTestingDotCom
         IWebElement getPaidToTest = driver.FindElement(By.XPath(xpaths[5]));
 
         action.MoveToElement(platform).Perform();
-        var platformBox = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("div.platform-nav")));
+        IWebElement platformBox = Getters.getMemuItemByCssSelector("div.platform-nav", wait);
         Assert.IsNotNull(platformBox);
 
         action.MoveToElement(solutions).Perform();
-        var solutionsBox = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("div.solutions-nav")));
+        var solutionsBox = Getters.getMemuItemByCssSelector("div.solutions-nav", wait);
         Assert.IsNotNull(solutionsBox);
         
-        // customers menu has no dropdown menu, so it should throw a timeout exception
-        action.MoveToElement(customers).Perform();    
-        try
-        {
-            var customersBox = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("div.customers-nav")));
-            Assert.Fail();
-        }catch(Exception e)
-        {
-            WebDriverTimeoutException expected = new WebDriverTimeoutException();
-            Assert.AreEqual(expected.GetType(), e.GetType());
-        }
+      
     }
 
+    
 }
